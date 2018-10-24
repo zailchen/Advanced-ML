@@ -6,6 +6,8 @@
 
 
 ## Installation
+1. Clone our project repository: `https://github.com/qianqianhu577/Advanced-ML`
+2. Install python modules with pip: `pip install -r requirements.txt`
 
 ## General Steps
 
