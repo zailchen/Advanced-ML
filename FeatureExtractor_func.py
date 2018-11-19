@@ -169,9 +169,8 @@ if __name__ == '__main__':
                      if col.startswith('fmri') 
                      and not col.endswith('select') 
                      and not col.endswith('motions')]
-    train_transformed = data_train.copy()
     for feature in fmri_features:
         ts_extracted = _load_fmri_motion_correction(data_train[feature], data_train['fmri_motions'])
-        train_transformed[feature] = calculate_connectomes_thread(6, ts_extracted, 'corr')
-        train_transformed[feature].to_pickle('train_corr_'+ feature +'.pkl')
+        distance_list = calculate_connectomes_thread(6, ts_extracted, 'corr')
+        distance_list.to_pickle('train_corr_'+ feature +'.pkl')
 
