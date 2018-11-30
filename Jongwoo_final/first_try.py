@@ -27,10 +27,44 @@ with open('fmri_corr_feature/train_corr_fmri_harvard_oxford_cort_prob_2mm.pkl', 
 with open('fmri_corr_feature/train_corr_fmri_power_2011.pkl', 'rb') as p_f:
     corr_power = pickle.load(p_f)
 
+
 from problem import get_train_data, get_test_data
 # Raw data
 data_train, labels_train = get_train_data()
 #data_test, labels_test = get_test_data()
+
+
+x_msdl = pd.DataFrame(corr_msdl, index=data_train.index)
+x_msdl.columns = ['msdl_{}'.format(i) for i in range(x_msdl.columns.size)]
+
+x_basc064 = pd.DataFrame(corr_basc064, index=data_train.index)
+x_basc064.columns = ['basc064_{}'.format(i) for i in range(x_basc064.columns.size)]
+
+x_basc122 = pd.DataFrame(corr_basc122, index=data_train.index)
+x_basc122.columns = ['basc122_{}'.format(i) for i in range(x_basc122.columns.size)]
+
+x_basc197 = pd.DataFrame(corr_basc197, index=data_train.index)
+x_basc197.columns = ['basc197_{}'.format(i) for i in range(x_basc197.columns.size)]
+
+x_craddock = pd.DataFrame(corr_craddock, index=data_train.index)
+x_craddock.columns = ['craddock_{}'.format(i) for i in range(x_craddock.columns.size)]
+
+x_harvard = pd.DataFrame(corr_harvard, index=data_train.index)
+x_harvard.columns = ['harvard_{}'.format(i) for i in range(x_harvard.columns.size)]
+
+x_power = pd.DataFrame(corr_power, index=data_train.index)
+x_power.columns = ['power_{}'.format(i) for i in range(x_power.columns.size)]
+
+
+X_fmri_all = pd.concat([x_msdl, x_basc064, x_basc122, x_basc197,
+                        x_craddock, x_harvard, x_power], axis=1) #shape: (1127, 96164)
+
+
+nan_ind = np.unique(np.where(np.isnan(X_fmri_all))[0]) # Which subject had nan..
+
+y = np.delete(labels_train, nan_ind) # Select appropriate y
+
+X_fmri = X_fmri_all.dropna() # remove nan -> shape: (1103, 96164) # QC ?
 
 
 
@@ -42,15 +76,6 @@ data_train, labels_train = get_train_data()
 # 1. Combine everything
 
 # Feature selection by Random Forest
-
-X_fmri_raw = pd.concat([corr_msdl, corr_basc064, corr_basc122, corr_basc197,
-                    corr_craddock, corr_harvard, corr_power], axis=1) #shape: (1127, 96164)
-
-nan_ind = np.unique(np.where(np.isnan(X_fmri_raw))[0]) # Which subject had nan..
-
-y = np.delete(labels_train, nan_ind) # Select appropriate y
-
-X_fmri = X_fmri_raw.dropna() # remove nan -> shape: (1103, 96164) # QC ?
 
 
 # Split train/test 8:2
@@ -123,7 +148,12 @@ logistic_model1_final = LR(C=0.01, penalty='l2').fit(selected_X_fmri_train, y_tr
 #svc_model1_final = SVC(kernel='linear', C=0.01, gamma=10, probability=True)
 #svc_model1_final.fit(selected_X_fmri_train, y_train)
 
-# Prediction
+
+
+##############
+# Prediction #
+##############
+
 y_pred_proba = logistic_model1_final.predict_proba(selected_X_fmri_test)[:,1]
 y_pred = logistic_model1_final.predict(selected_X_fmri_test)
 
