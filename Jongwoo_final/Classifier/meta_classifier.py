@@ -9,17 +9,29 @@ from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import StratifiedKFold
 from sklearn.ensemble import BaggingClassifier
 
+import keras    # refer to https://keras.io/
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Flatten, Activation
+from keras.layers import Conv2D, MaxPooling2D, Conv1D, MaxPooling1D, GlobalMaxPooling1D
+from keras import backend as K
+from keras.layers.normalization import BatchNormalization
+from sklearn.preprocessing import StandardScaler
+from sklearn.base import BaseEstimator
+
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.layers import Conv1D, GlobalAveragePooling1D
 
 
+
+'''
 def _preprocess_data(data, labels=None, nsubseq=5, maxlen=40):
-    nfeat = data[0].shape[1]
+    nfeat = data.iloc[0].shape[0]
     data_aug = []
     labels_aug = []
     for k in range(len(data)):
-        seq_lenth_tmp = data[k].shape[0]
+        seq_lenth_tmp = data.iloc[k].shape[0]
         if seq_lenth_tmp < (maxlen + nsubseq - 1):
             data_padded_tmp = np.zeros((maxlen + nsubseq - 1, nfeat))
             data_padded_tmp[-seq_lenth_tmp:] = data[k]
@@ -31,49 +43,74 @@ def _preprocess_data(data, labels=None, nsubseq=5, maxlen=40):
         else:
             ind_tmp = np.linspace(0, seq_lenth_tmp - maxlen, nsubseq).astype(int)
             for i in ind_tmp:
-                data_aug.append(data[k][i:(i + maxlen)])
+                data_aug.append(data.iloc[k][i:(i + maxlen)])
                 if labels is not None:
                     labels_aug.append(labels[k])
     if labels is not None:
         return np.array(data_aug), np.array(labels_aug)
     else:
         return np.array(data_aug)
+'''
+
+
+def _preprocess_data_1D(X_df, y = None):
+    # Scale data
+    X = StandardScaler().fit_transform(X_df)
+    # Reshape data
+    X = X.reshape(X.shape[0], X.shape[1], 1).astype('float32')
+
+    if y is not None:
+        return np.array(X), np.array(keras.utils.to_categorical(y)) # convert class vectors to binary class matrices
+    else:
+        return np.array(X)
+
+#X_train, y_train = _preprocess_data_1D(X, y)
 
 
 class Conv_1d(BaseEstimator):
-    def __init__(self, nhid=64, epochs=1000, nsubseq=5, maxlen=50, kernel_size=3):
-        self.nhid = nhid
-        self.epochs = epochs
-        self.nsubseq = nsubseq
-        self.maxlen = maxlen
+    def __init__(self, nfilt=15, kernel_size=3, strides=1, pool_size=4, pool_strides=4, fc=15, epochs=10):
+        self.nfilt = nfilt
         self.kernel_size = kernel_size
+        self.strides = strides
+        self.pool_size = pool_size
+        self.pool_strides = pool_strides
+        self.fc = fc
+        self.epochs = epochs
         self.model_ = None
 
-    def fit(self, X, y, **kwargs):
+    def fit(self, X_df, y, **kwargs):
+        x_train, y_train = _preprocess_data_1D(X_df, y)
+
         self.set_params(**kwargs)
-        nfeat = X[0].shape[1]
         model = Sequential()
-        model.add(Conv1D(self.nhid, self.kernel_size, activation='relu', input_shape=(self.maxlen, nfeat)))
+        model.add(Conv1D(filters=self.nfilt, kernel_size=self.kernel_size, activation='relu', input_shape=x_train.shape[1:3], strides=self.strides))
+        model.add(MaxPooling1D(pool_size=self.pool_size, strides=self.pool_strides))
+        #model.add(Conv1D(filters=16, kernel_size=5, activation='relu', strides=1))
+        #model.add(MaxPooling1D(pool_size=4, strides=4))
         model.add(Dropout(0.4))
-        model.add(GlobalAveragePooling1D())
-        model.add(Dense(1, activation='sigmoid'))
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-        X_train, y_train = _preprocess_data(data=X, labels=y, nsubseq=self.nsubseq, maxlen=self.maxlen)
-        model.fit(X_train, y_train, epochs=self.epochs, batch_size=32,
-                  verbose=0, shuffle=True)
+        model.add(Flatten())
+        model.add(Dense(self.fc, activation='sigmoid'))
+        model.add(Dense(2, activation='sigmoid'))
+        model.compile(loss=keras.losses.binary_crossentropy,
+                      optimizer=keras.optimizers.adam(),
+                      metrics=['accuracy'])
+
+        model.fit(x_train, y_train, epochs=self.epochs,
+                  batch_size=32, verbose=1, shuffle=True,
+                  validation_split=0.1)
         self.model_ = model
         return self
 
     def predict(self, X):
-        X_test = _preprocess_data(data=X, nsubseq=self.nsubseq, maxlen=self.maxlen)
+        X_test = _preprocess_data_1D(X)
         y_pred = self.model_.predict(X_test)
-        probs = np.mean(np.reshape(y_pred, (-1, self.nsubseq)), axis=1, keepdims=True)
+        probs = np.mean(np.squeeze(y_pred), axis=1)
         return (probs > 0.5).astype('int32')
 
     def predict_proba(self, X):
-        X_test = _preprocess_data(data=X, nsubseq=self.nsubseq, maxlen=self.maxlen)
+        X_test = _preprocess_data_1D(X)
         y_pred = self.model_.predict(X_test)
-        probs = np.mean(np.reshape(y_pred, (-1, self.nsubseq)), axis=1, keepdims=True)
+        probs = np.mean(np.squeeze(y_pred), axis=1)
         probs = np.hstack([1 - probs, probs])
         return probs
 
@@ -99,7 +136,7 @@ class Classifier(BaseEstimator):
                                                        max_features=0.8,
                                                        random_state=42))
         self.clf_nn1 = Conv_1d()
-        self.clf_nn2 = Conv_1d(nhid=32, epochs=5, nsubseq=10, maxlen=70)
+        self.clf_nn2 = Conv_1d() # try different parameters
 
         self.meta_clf = make_pipeline(StandardScaler(), LogisticRegression())
 
@@ -204,3 +241,4 @@ class Classifier(BaseEstimator):
                             y_anat_pred * y_fc1_pred,
                             y_anat_pred * y_nn1_pred,
                             y_fc2_pred * y_nn2_pred], axis=1))
+

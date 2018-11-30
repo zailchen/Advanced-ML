@@ -90,7 +90,7 @@ y = labels_train
 ##############
 
 # Load meta_classifier from './Classifier'
-from final.Classifier.meta_classifier import Classifier
+from Jongwoo_final.Classifier.meta_classifier import Classifier
 
 fit1 = Classifier().fit(X, y)
 
