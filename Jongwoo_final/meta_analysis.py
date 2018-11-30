@@ -1,6 +1,7 @@
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 ################
 ##### DATA #####
@@ -31,7 +32,7 @@ Eventually we need to filter anatomy_select and fmri_select that is 1
 # Prepare data for group analysis
 from problem import get_train_data
 data_train, labels_train = get_train_data()
-data_test, labels_test = get_test_data()
+
 
 # Load data
 
@@ -41,19 +42,19 @@ data_test, labels_test = get_test_data()
 
 import pickle
 
-with open('final/fmri_corr_features/1D/msdl_corr_1d.pkl', 'rb') as p_f:
+with open('fmri_corr_features/1D/msdl_corr_1d.pkl', 'rb') as p_f:
     msdl_corr = pickle.load(p_f)
-with open('final/fmri_corr_features/1D/basc064_corr_1d.pkl', 'rb') as p_f:
+with open('fmri_corr_features/1D/basc064_corr_1d.pkl', 'rb') as p_f:
     basc064_corr = pickle.load(p_f)
-with open('final/fmri_corr_features/1D/basc122_corr_1d.pkl', 'rb') as p_f:
+with open('fmri_corr_features/1D/basc122_corr_1d.pkl', 'rb') as p_f:
     basc122_corr = pickle.load(p_f)
-with open('final/fmri_corr_features/1D/basc197_corr_1d.pkl', 'rb') as p_f:
+with open('fmri_corr_features/1D/basc197_corr_1d.pkl', 'rb') as p_f:
     basc197_corr = pickle.load(p_f)
-with open('final/fmri_corr_features/1D/crad_corr_1d.pkl', 'rb') as p_f:
+with open('fmri_corr_features/1D/crad_corr_1d.pkl', 'rb') as p_f:
     crad_corr = pickle.load(p_f)
-with open('final/fmri_corr_features/1D/harvard_corr_1d.pkl', 'rb') as p_f:
+with open('fmri_corr_features/1D/harvard_corr_1d.pkl', 'rb') as p_f:
     harvard_corr = pickle.load(p_f)
-with open('final/fmri_corr_features/1D/power_corr_1d.pkl', 'rb') as p_f:
+with open('fmri_corr_features/1D/power_corr_1d.pkl', 'rb') as p_f:
     power_corr = pickle.load(p_f)
 
 
@@ -84,6 +85,19 @@ X_demo_adolescent = X_demo[X_demo.participants_age < 18]
 X = pd.concat([X_anatomy, crad_corr, basc122_corr, power_corr, basc197_corr], axis=1)
 y = labels_train
 
+# Split train/test 8:2
+from sklearn.model_selection import StratifiedShuffleSplit
+
+def get_cv(X, y):
+    cv = StratifiedShuffleSplit(n_splits=8, test_size=0.2, random_state=42)
+    return cv.split(X, y)
+
+for train, test in get_cv(X, y):
+    x_train = X.iloc[train]  # train data set
+    y_train = y[train]  # label train
+    x_test = X.iloc[test]  # test set
+    y_test = y[test]  # label test
+
 
 ##############
 ## Analysis ##
@@ -92,14 +106,13 @@ y = labels_train
 # Load meta_classifier from './Classifier'
 from Jongwoo_final.Classifier.meta_classifier import Classifier
 
-fit1 = Classifier().fit(X, y)
+fit1 = Classifier().fit(x_train, y_train)
 
-
+# save the model
+fit1.to_pickle('models/meta_analysis/fit1.pkl')
 
 
 # Prediction
-x_test = data_test
-y_test = labels_test
 
 y_pred_proba = fit1.predict_proba(x_test)[:,1]
 y_pred = fit1.predict(x_test)
@@ -114,6 +127,39 @@ Accuracy = accuracy_score(y_test, y_pred)
 print("ROC-AUC:", ROC_AUC, ", Accuracy=", Accuracy)
 
 
+# plotting the metrics
+fig = plt.figure()
+plt.subplot(2,1,1)
+plt.plot(fit1.history['acc'])
+plt.plot(fit1.history['val_acc'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'valid'], loc='lower right')
+plt.subplot(2,1,2)
+plt.plot(fit1.history['loss'])
+plt.plot(fit1.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
+plt.xlabel('epoch')
+plt.legend(['train', 'valid'], loc='upper right')
+plt.tight_layout()
+fig
 
 
+
+'''
+# Evaluate
+
+score = model_2d.evaluate(x_test_2d, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+
+probs = model_2d.predict_proba(x_test_2d)[:, 1]
+
+from sklearn.metrics import roc_auc_score
+ROC_AUC=roc_auc_score(labels_test, probs)
+#Area Under the Curve of the Receiver Operating Characteristic (ROC-AUC)
+print("ROC-AUC:",ROC_AUC)
+'''
 
