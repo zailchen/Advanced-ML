@@ -64,9 +64,9 @@ class Conv_1d(BaseEstimator):
                       optimizer=keras.optimizers.adam(),
                       metrics=['accuracy'])
 
-        model.fit(x_train, y_train, epochs=self.epochs,
+        model_log = model.fit(x_train, y_train, epochs=self.epochs,
                   batch_size=32, verbose=1, shuffle=True)
-        self.model_ = model
+        self.model_ = model_log
         return self
 
     def predict(self, X):

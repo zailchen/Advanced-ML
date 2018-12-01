@@ -127,18 +127,19 @@ Accuracy = accuracy_score(y_test, y_pred)
 print("ROC-AUC:", ROC_AUC, ", Accuracy=", Accuracy)
 
 
+
 # plotting the metrics
 fig = plt.figure()
 plt.subplot(2,1,1)
-plt.plot(fit1.history['acc'])
-plt.plot(fit1.history['val_acc'])
+plt.plot(fit1.clf_nn1.model_.history['acc'])
+plt.plot(fit1.clf_nn1.model_.history['val_acc'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'valid'], loc='lower right')
 plt.subplot(2,1,2)
-plt.plot(fit1.history['loss'])
-plt.plot(fit1.history['val_loss'])
+plt.plot(fit1.clf_nn1.model_.history['loss'])
+plt.plot(fit1.clf_nn1.model_.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
