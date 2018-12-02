@@ -24,35 +24,6 @@ from keras.layers import Dense, Dropout
 from keras.layers import Conv1D, GlobalAveragePooling1D
 
 
-
-'''
-def _preprocess_data(data, labels=None, nsubseq=5, maxlen=40):
-    nfeat = data.iloc[0].shape[0]
-    data_aug = []
-    labels_aug = []
-    for k in range(len(data)):
-        seq_lenth_tmp = data.iloc[k].shape[0]
-        if seq_lenth_tmp < (maxlen + nsubseq - 1):
-            data_padded_tmp = np.zeros((maxlen + nsubseq - 1, nfeat))
-            data_padded_tmp[-seq_lenth_tmp:] = data[k]
-            ind_tmp = np.linspace(0, nsubseq - 1, nsubseq).astype(int)
-            for i in ind_tmp:
-                data_aug.append(data_padded_tmp[i:(i + maxlen)])
-                if labels is not None:
-                    labels_aug.append(labels[k])
-        else:
-            ind_tmp = np.linspace(0, seq_lenth_tmp - maxlen, nsubseq).astype(int)
-            for i in ind_tmp:
-                data_aug.append(data.iloc[k][i:(i + maxlen)])
-                if labels is not None:
-                    labels_aug.append(labels[k])
-    if labels is not None:
-        return np.array(data_aug), np.array(labels_aug)
-    else:
-        return np.array(data_aug)
-'''
-
-
 def _preprocess_data_1D(X_df, y = None):
     # Scale data
     X = StandardScaler().fit_transform(X_df)
@@ -64,11 +35,9 @@ def _preprocess_data_1D(X_df, y = None):
     else:
         return np.array(X)
 
-#X_train, y_train = _preprocess_data_1D(X, y)
-
 
 class Conv_1d(BaseEstimator):
-    def __init__(self, nfilt=15, kernel_size=3, strides=1, pool_size=4, pool_strides=4, fc=15, epochs=10):
+    def __init__(self, nfilt=15, kernel_size=3, strides=1, pool_size=4, pool_strides=4, fc=15, epochs=1000):
         self.nfilt = nfilt
         self.kernel_size = kernel_size
         self.strides = strides
@@ -95,22 +64,21 @@ class Conv_1d(BaseEstimator):
                       optimizer=keras.optimizers.adam(),
                       metrics=['accuracy'])
 
-        model.fit(x_train, y_train, epochs=self.epochs,
-                  batch_size=32, verbose=1, shuffle=True,
-                  validation_split=0.1)
-        self.model_ = model
+        model_log = model.fit(x_train, y_train, epochs=self.epochs,
+                  batch_size=32, verbose=1, shuffle=True)
+        self.model_ = model_log
         return self
 
     def predict(self, X):
         X_test = _preprocess_data_1D(X)
         y_pred = self.model_.predict(X_test)
-        probs = np.mean(np.squeeze(y_pred), axis=1)
+        probs = np.mean(np.reshape(y_pred, (-1, 2)), axis=1, keepdims=True)
         return (probs > 0.5).astype('int32')
 
     def predict_proba(self, X):
         X_test = _preprocess_data_1D(X)
         y_pred = self.model_.predict(X_test)
-        probs = np.mean(np.squeeze(y_pred), axis=1)
+        probs = np.mean(np.reshape(y_pred, (-1, 2)), axis=1, keepdims=True)
         probs = np.hstack([1 - probs, probs])
         return probs
 
