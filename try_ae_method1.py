@@ -7,9 +7,7 @@ import random
 import tensorflow as tf
 from nilearn.signal import clean
 from sklearn.metrics import roc_auc_score
-from docopt import docopt
-from utils import (load_phenotypes, format_config, hdf5_handler, load_fold,
-                   sparsity_penalty, reset, to_softmax, load_ae_encoder)
+from utils import (format_config, sparsity_penalty, reset, to_softmax, load_ae_encoder)
 from model import ae, nn
 from problem import get_train_data
 
@@ -310,11 +308,11 @@ def run_finetuning(experiment,
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
     
     # Compute AUC score
-    AUC = roc_auc_score(tf.argmax(model["expected"], 1), tf.argmax(model["output"], 1))
+    AUC, auc_op = tf.metrics.auc(labels=tf.argmax(model["expected"], 1), predictions=model['output'][:,1])
 
 
     # Initialize Tensorflow session
-    init = tf.global_variables_initializer()
+    init = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
     with tf.Session() as sess:
         sess.run(init)
 
@@ -330,7 +328,7 @@ def run_finetuning(experiment,
         for epoch in range(training_iters):
 
             # Break training set into batches
-            batches = range(len(X_train) / batch_size)
+            batches = range(len(X_train) // batch_size)
             costs = np.zeros((len(batches), 3))
             accs = np.zeros((len(batches), 3))
             AUCs = np.zeros((len(batches), 3))
@@ -353,8 +351,8 @@ def run_finetuning(experiment,
                 batch_xs, batch_ys = X_train[from_i:to_i], y_train[from_i:to_i]
 
                 # Run optimization and retrieve training cost and accuracy
-                _, cost_train, acc_train, AUC_train = sess.run(
-                    [optimizer, model["cost"], accuracy, AUC],
+                _, cost_train, acc_train, AUC_train, auc_op_train = sess.run(
+                    [optimizer, model["cost"], accuracy, AUC, auc_op],
                     feed_dict={
                         model["input"]: batch_xs,
                         model["expected"]: batch_ys,
@@ -365,8 +363,8 @@ def run_finetuning(experiment,
                 )
 
                 # Compute validation cost and accuracy
-                cost_valid, acc_valid, AUC_valid = sess.run(
-                    [model["cost"], accuracy, AUC],
+                cost_valid, acc_valid, AUC_valid, auc_op_valid = sess.run(
+                    [model["cost"], accuracy, AUC, auc_op],
                     feed_dict={
                         model["input"]: X_valid,
                         model["expected"]: y_valid,
@@ -376,8 +374,8 @@ def run_finetuning(experiment,
                 )
 
                 # Compute test cost and accuracy
-                cost_test, acc_test, AUC_test = sess.run(
-                    [model["cost"], accuracy, AUC],
+                cost_test, acc_test, AUC_test, auc_op_test = sess.run(
+                    [model["cost"], accuracy, AUC, auc_op],
                     feed_dict={
                         model["input"]: X_test,
                         model["expected"]: y_test,
