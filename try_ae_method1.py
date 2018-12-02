@@ -5,6 +5,8 @@ import numpy as np
 import pickle
 import random
 import tensorflow as tf
+from nilearn.signal import clean
+from sklearn.metrics import roc_auc_score
 from docopt import docopt
 from utils import (load_phenotypes, format_config, hdf5_handler, load_fold,
                    sparsity_penalty, reset, to_softmax, load_ae_encoder)
@@ -250,6 +252,7 @@ def run_autoencoder2(experiment,
             else:
                 print
 
+
 def run_finetuning(experiment,
                    X_train, y_train, X_valid, y_valid, X_test, y_test,
                    model_path, prev_model_1_path, prev_model_2_path,
@@ -305,6 +308,10 @@ def run_finetuning(experiment,
         tf.argmax(model["expected"], 1)
     )
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
+    
+    # Compute AUC score
+    AUC = roc_auc_score(tf.argmax(model["expected"], 1), tf.argmax(model["output"], 1))
+
 
     # Initialize Tensorflow session
     init = tf.global_variables_initializer()
@@ -314,9 +321,10 @@ def run_finetuning(experiment,
         # Define model saver
         saver = tf.train.Saver(model["params"], write_version=tf.train.SaverDef.V2)
 
-        # Initialize with an absurd cost and accuracy for model selection
+        # Initialize with an absurd cost, accuracy, auc for model selection
         prev_costs = np.array([9999999999] * 3)
         prev_accs = np.array([0.0] * 3)
+        prev_AUCs = np.array([0.0] * 3)
 
         # Iterate Epochs
         for epoch in range(training_iters):
@@ -325,6 +333,7 @@ def run_finetuning(experiment,
             batches = range(len(X_train) / batch_size)
             costs = np.zeros((len(batches), 3))
             accs = np.zeros((len(batches), 3))
+            AUCs = np.zeros((len(batches), 3))
 
             # Compute momentum saturation
             alpha = float(epoch) / float(saturate_momentum)
@@ -344,8 +353,8 @@ def run_finetuning(experiment,
                 batch_xs, batch_ys = X_train[from_i:to_i], y_train[from_i:to_i]
 
                 # Run optimization and retrieve training cost and accuracy
-                _, cost_train, acc_train = sess.run(
-                    [optimizer, model["cost"], accuracy],
+                _, cost_train, acc_train, AUC_train = sess.run(
+                    [optimizer, model["cost"], accuracy, AUC],
                     feed_dict={
                         model["input"]: batch_xs,
                         model["expected"]: batch_ys,
@@ -356,8 +365,8 @@ def run_finetuning(experiment,
                 )
 
                 # Compute validation cost and accuracy
-                cost_valid, acc_valid = sess.run(
-                    [model["cost"], accuracy],
+                cost_valid, acc_valid, AUC_valid = sess.run(
+                    [model["cost"], accuracy, AUC],
                     feed_dict={
                         model["input"]: X_valid,
                         model["expected"]: y_valid,
@@ -367,8 +376,8 @@ def run_finetuning(experiment,
                 )
 
                 # Compute test cost and accuracy
-                cost_test, acc_test = sess.run(
-                    [model["cost"], accuracy],
+                cost_test, acc_test, AUC_test = sess.run(
+                    [model["cost"], accuracy, AUC],
                     feed_dict={
                         model["input"]: X_test,
                         model["expected"]: y_test,
@@ -379,6 +388,7 @@ def run_finetuning(experiment,
 
                 costs[ib] = [cost_train, cost_valid, cost_test]
                 accs[ib] = [acc_train, acc_valid, acc_test]
+                AUCs[ib] = [AUC_train, AUC_valid, AUC_test]
 
             # Compute the average costs from all batches
             costs = costs.mean(axis=0)
@@ -387,16 +397,24 @@ def run_finetuning(experiment,
             # Compute the average accuracy from all batches
             accs = accs.mean(axis=0)
             acc_train, acc_valid, acc_test = accs
+            
+            # Compute the average AUC for all batches
+            AUCs = AUCs.mean(axis=0)
+            AUC_train, AUC_valid, AUC_test = AUCs
 
             # Pretty print training info
             print(format_config(
-                "Exp={experiment}, Model=mlp, Iter={epoch:5d}, Acc={acc_train:.6f} {acc_valid:.6f} {acc_test:.6f}, Momentum={momentum:.6f}",
+                "Exp={experiment}, Model=mlp, Iter={epoch:5d}, Acc={acc_train:.6f} {acc_valid:.6f} {acc_test:.6f}, \
+                AUC={AUC_train:.6f} {AUC_valid:.6f} {AUC_test:.6f}, Momentum={momentum:.6f}",
                 {
                     "experiment": experiment,
                     "epoch": epoch,
                     "acc_train": acc_train,
                     "acc_valid": acc_valid,
                     "acc_test": acc_test,
+                    "AUC_train": AUC_train,
+                    "AUC_valid": AUC_valid,
+                    "AUC_test": AUC_test,
                     "momentum": momentum,
                 }
             ))
@@ -408,6 +426,7 @@ def run_finetuning(experiment,
                 saver.save(sess, model_path)
                 prev_accs = accs
                 prev_costs = costs
+                prev_AUCs = AUCs
             else:
                 print
 
@@ -433,6 +452,8 @@ def split(matrix, train_ratio = 0.7, valid_ratio = 0.9, seed = 19):
     
     return X_train, y_train, X_valid, y_valid, X_test, y_test
 
+
+
 if __name__ == "__main__":
 
     experiment_cv = 'All' # adjust according to needs
@@ -445,13 +466,14 @@ if __name__ == "__main__":
     
     data_train, labels_train = get_train_data()
     
-    feature_list = ['basc064','basc122','basc197','crad','harvard','msdl','power']
+    T1_feature = data_train.columns[3:210]
     
-    feature_path = 'fmri_corr_features/1D/' + feature_list[0] + '_corr_1d.pkl' 
-    with open(feature_path, 'rb') as f:
-        matrix_all = np.asarray(pickle.load(f))
+    fmri_feature = ['basc064','basc122','basc197','crad','harvard','msdl','power']
+    
+    matrix_all = np.asarray(data_train[T1_feature])
+    matrix_all = clean(matrix_all, detrend=False, standardize=True)
         
-    for feature in feature_list[1:]:
+    for feature in fmri_feature:
         feature_path = 'fmri_corr_features/1D/' + feature + '_corr_1d.pkl'
         with open(feature_path, 'rb') as f:
             matrix = np.asarray(pickle.load(f))
@@ -498,3 +520,4 @@ if __name__ == "__main__":
                    prev_model_2_path=ae2_model_path,
                    code_size_1=code_size_1,
                    code_size_2=code_size_2)
+
