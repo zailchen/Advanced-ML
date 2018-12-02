@@ -37,7 +37,7 @@ def _preprocess_data_1D(X_df, y = None):
 
 
 class Conv_1d(BaseEstimator):
-    def __init__(self, nfilt=15, kernel_size=3, strides=1, pool_size=4, pool_strides=4, fc=15, epochs=1000):
+    def __init__(self, nfilt=15, kernel_size=3, strides=1, pool_size=4, pool_strides=4, fc=15, epochs=500):
         self.nfilt = nfilt
         self.kernel_size = kernel_size
         self.strides = strides
@@ -64,9 +64,9 @@ class Conv_1d(BaseEstimator):
                       optimizer=keras.optimizers.adam(),
                       metrics=['accuracy'])
 
-        model_log = model.fit(x_train, y_train, epochs=self.epochs,
+        model.fit(x_train, y_train, epochs=self.epochs,
                   batch_size=32, verbose=1, shuffle=True)
-        self.model_ = model_log
+        self.model_ = model
         return self
 
     def predict(self, X):
@@ -87,19 +87,19 @@ class Classifier(BaseEstimator):
     def __init__(self):
         self.clf_anat = make_pipeline(StandardScaler(),
                                       BaggingClassifier(base_estimator=LogisticRegression(C=0.1),
-                                                        n_estimators=50,
+                                                        n_estimators=1000,
                                                         max_samples=0.8,
                                                         max_features=0.8,
                                                         random_state=42))
         self.clf_fc1 = make_pipeline(StandardScaler(),
                                      BaggingClassifier(base_estimator=LogisticRegression(C=0.1),
-                                                       n_estimators=50,
+                                                       n_estimators=1000,
                                                        max_samples=0.8,
                                                        max_features=0.8,
                                                        random_state=42))
         self.clf_fc2 = make_pipeline(StandardScaler(),
                                      BaggingClassifier(base_estimator=LogisticRegression(C=0.1),
-                                                       n_estimators=50,
+                                                       n_estimators=1000,
                                                        max_samples=0.8,
                                                        max_features=0.8,
                                                        random_state=42))

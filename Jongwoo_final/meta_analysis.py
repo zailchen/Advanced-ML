@@ -108,16 +108,13 @@ from Jongwoo_final.Classifier.meta_classifier import Classifier
 
 fit1 = Classifier().fit(x_train, y_train)
 
-# save the model
-fit1.to_pickle('models/meta_analysis/fit1.pkl')
-
 
 # Prediction
 
 y_pred_proba = fit1.predict_proba(x_test)[:,1]
 y_pred = fit1.predict(x_test)
 
-# Accuracy
+# Evaluate
 from sklearn.metrics import roc_auc_score, accuracy_score
 
 ROC_AUC = roc_auc_score(y_test, y_pred_proba)
@@ -126,41 +123,4 @@ Accuracy = accuracy_score(y_test, y_pred)
 # Area Under the Curve of the Receiver Operating Characteristic (ROC-AUC)
 print("ROC-AUC:", ROC_AUC, ", Accuracy=", Accuracy)
 
-
-
-# plotting the metrics
-fig = plt.figure()
-plt.subplot(2,1,1)
-plt.plot(fit1.clf_nn1.model_.history['acc'])
-plt.plot(fit1.clf_nn1.model_.history['val_acc'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'valid'], loc='lower right')
-plt.subplot(2,1,2)
-plt.plot(fit1.clf_nn1.model_.history['loss'])
-plt.plot(fit1.clf_nn1.model_.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'valid'], loc='upper right')
-plt.tight_layout()
-fig
-
-
-
-'''
-# Evaluate
-
-score = model_2d.evaluate(x_test_2d, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
-
-probs = model_2d.predict_proba(x_test_2d)[:, 1]
-
-from sklearn.metrics import roc_auc_score
-ROC_AUC=roc_auc_score(labels_test, probs)
-#Area Under the Curve of the Receiver Operating Characteristic (ROC-AUC)
-print("ROC-AUC:",ROC_AUC)
-'''
 
