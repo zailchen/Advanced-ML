@@ -219,7 +219,7 @@ if __name__ == '__main__':
         print(feature)
         ts_extracted = _load_fmri_motion_correction(data_train[feature], data_train['fmri_motions'])
         #path_length_list = calculate_connectomes_thread(8, ts_extracted, 'dtw_path_len', w=10)
-        distance_list, path_length_list = calculate_connectomes_thread(8, ts_extracted, 'dtw_all', w=10)
+        distance_list, path_lengths_list = calculate_connectomes_thread(8, ts_extracted, 'dtw_all', w=10)
         with open('train_dtw_Dist_'+ feature +'.pkl', 'wb') as f1:
         	pickle.dump(np.array(distance_list), f1)
         with open('train_dtw_PathLen_'+ feature +'.pkl', 'wb') as f2:
