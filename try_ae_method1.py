@@ -31,7 +31,7 @@ def run_autoencoder1(experiment,
     ae_enc = tf.nn.tanh  # Tangent hyperbolic
     ae_dec = None  # Linear activation
 
-    training_iters = 200
+    training_iters = 100
     batch_size = 100
     n_classes = 2
 
@@ -59,6 +59,13 @@ def run_autoencoder1(experiment,
         prev_costs = np.array([9999999999] * 3)
 
         for epoch in range(training_iters):
+            
+            # randomly shuffle data
+            index = np.arange(X_train.shape[0])
+            random.shuffle(index)
+            
+            X_train = X_train[index,]
+            y_train = y_train[index]
 
             # Break training set into batches
             batches = range(len(X_train) // batch_size)
@@ -163,7 +170,7 @@ def run_autoencoder2(experiment,
     ae_enc = tf.nn.tanh
     ae_dec = None
 
-    training_iters = 200
+    training_iters = 100
     batch_size = 10
     n_classes = 2
 
@@ -186,6 +193,13 @@ def run_autoencoder2(experiment,
 
         # Iterate Epochs
         for epoch in range(training_iters):
+            
+            # randomly shuffle data
+            index = np.arange(X_train.shape[0])
+            random.shuffle(index)
+            
+            X_train = X_train[index,]
+            y_train = y_train[index]
 
             # Break training set into batches
             batches = range(len(X_train) // batch_size)
@@ -270,7 +284,7 @@ def run_finetuning(experiment,
     saturate_momentum = 100
 
     training_iters = 100
-    start_saving_at = 20
+    start_saving_at = 5
     batch_size = 10
     n_classes = 2
 
@@ -299,7 +313,10 @@ def run_finetuning(experiment,
     # Place GD + momentum optimizer
     model["momentum"] = tf.placeholder("float32")
     optimizer = tf.train.MomentumOptimizer(learning_rate, model["momentum"]).minimize(model["cost"])
-
+    
+    # Place Adam optimizer
+    #optimizer = tf.train.AdamOptimizer(learning_rate).minimize(model["cost"]) # cross entropy
+    
     # Compute accuracies
     correct_prediction = tf.equal(
         tf.argmax(model["output"], 1),
@@ -307,9 +324,6 @@ def run_finetuning(experiment,
     )
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
     
-    # Compute AUC score
-    AUC, auc_op = tf.metrics.auc(labels=tf.argmax(model["expected"], 1), predictions=model['output'][:,1])
-
 
     # Initialize Tensorflow session
     init = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
@@ -320,12 +334,21 @@ def run_finetuning(experiment,
         saver = tf.train.Saver(model["params"], write_version=tf.train.SaverDef.V2)
 
         # Initialize with an absurd cost, accuracy, auc for model selection
-        prev_costs = np.array([9999999999] * 3)
-        prev_accs = np.array([0.0] * 3)
-        prev_AUCs = np.array([0.0] * 3)
-
+        best_acc = 0.0
+        
         # Iterate Epochs
         for epoch in range(training_iters):
+            
+            # randomly shuffle data
+            index = np.arange(X_train.shape[0])
+            random.shuffle(index)
+            
+            X_train = X_train[index,]
+            y_train = y_train[index]
+            
+            # exclude case that are all 1 or all 0
+            if 0 in np.sum(y_train, axis=0):
+                continue
 
             # Break training set into batches
             batches = range(len(X_train) // batch_size)
@@ -349,10 +372,12 @@ def run_finetuning(experiment,
 
                 # Select current batch
                 batch_xs, batch_ys = X_train[from_i:to_i], y_train[from_i:to_i]
-
+                if 0 in np.sum(batch_ys, axis=0):
+                    continue
+                
                 # Run optimization and retrieve training cost and accuracy
-                _, cost_train, acc_train, AUC_train, auc_op_train = sess.run(
-                    [optimizer, model["cost"], accuracy, AUC, auc_op],
+                _, cost_train, acc_train, true_y, pred_y = sess.run(
+                    [optimizer, model["cost"], accuracy, model['expected'], model['output']],
                     feed_dict={
                         model["input"]: batch_xs,
                         model["expected"]: batch_ys,
@@ -361,10 +386,12 @@ def run_finetuning(experiment,
                         model["momentum"]: momentum,
                     }
                 )
-
+                # Compute AUC score
+                AUC_train = roc_auc_score(np.argmax(true_y, 1), pred_y[:,1])
+                
                 # Compute validation cost and accuracy
-                cost_valid, acc_valid, AUC_valid, auc_op_valid = sess.run(
-                    [model["cost"], accuracy, AUC, auc_op],
+                cost_valid, acc_valid, true_y, pred_y = sess.run(
+                    [model["cost"], accuracy, model['expected'], model['output']],
                     feed_dict={
                         model["input"]: X_valid,
                         model["expected"]: y_valid,
@@ -372,10 +399,12 @@ def run_finetuning(experiment,
                         model["dropouts"][1]: 1.0,
                     }
                 )
+                AUC_valid = roc_auc_score(np.argmax(true_y, 1), pred_y[:,1])
+
 
                 # Compute test cost and accuracy
-                cost_test, acc_test, AUC_test, auc_op_test = sess.run(
-                    [model["cost"], accuracy, AUC, auc_op],
+                cost_test, acc_test, true_y, pred_y = sess.run(
+                    [model["cost"], accuracy, model['expected'], model['output']],
                     feed_dict={
                         model["input"]: X_test,
                         model["expected"]: y_test,
@@ -383,6 +412,8 @@ def run_finetuning(experiment,
                         model["dropouts"][1]: 1.0,
                     }
                 )
+                AUC_test = roc_auc_score(np.argmax(true_y, 1), pred_y[:,1])
+
 
                 costs[ib] = [cost_train, cost_valid, cost_test]
                 accs[ib] = [acc_train, acc_valid, acc_test]
@@ -403,7 +434,7 @@ def run_finetuning(experiment,
             # Pretty print training info
             print(format_config(
                 "Exp={experiment}, Model=mlp, Iter={epoch:5d}, Acc={acc_train:.6f} {acc_valid:.6f} {acc_test:.6f}, \
-                AUC={AUC_train:.6f} {AUC_valid:.6f} {AUC_test:.6f}, Momentum={momentum:.6f}",
+                AUC={AUC_train:.6f} {AUC_valid:.6f} {AUC_test:.6f}",
                 {
                     "experiment": experiment,
                     "epoch": epoch,
@@ -419,20 +450,15 @@ def run_finetuning(experiment,
 
             # Save better model if optimization achieves a lower accuracy
             # and avoid initial epochs because of the fluctuations
-            if acc_valid > prev_accs[1] and epoch > start_saving_at:
+            if acc_valid > best_acc and epoch > start_saving_at:
                 print("Saving better model")
                 saver.save(sess, model_path)
-                prev_accs = accs
-                prev_costs = costs
-                prev_AUCs = AUCs
-            else:
-                print
+                best_acc = acc_valid
 
 
-def split(matrix, train_ratio = 0.7, valid_ratio = 0.9, seed = 19):
+def split(matrix, train_ratio = 0.8, valid_ratio = 0.9):
     n = matrix.shape[0]
     index = np.arange(n)
-    random.seed(19)
     random.shuffle(index)
     
     train_id = index[:int(n*train_ratio)]
@@ -454,9 +480,9 @@ def split(matrix, train_ratio = 0.7, valid_ratio = 0.9, seed = 19):
 
 if __name__ == "__main__":
 
-    experiment_cv = 'All' # adjust according to needs
+    experiment_cv = 'All5' # adjust according to needs
     
-    train_ratio = 0.7
+    train_ratio = 0.8
     valid_ratio = 0.9
     
     code_size_1 = 1000
