@@ -345,10 +345,7 @@ def run_finetuning(experiment,
             
             X_train = X_train[index,]
             y_train = y_train[index]
-            
-            # exclude case that are all 1 or all 0
-            if 0 in np.sum(y_train, axis=0):
-                continue
+
 
             # Break training set into batches
             batches = range(len(X_train) // batch_size)
@@ -372,6 +369,8 @@ def run_finetuning(experiment,
 
                 # Select current batch
                 batch_xs, batch_ys = X_train[from_i:to_i], y_train[from_i:to_i]
+
+                # exclude case that are all 1 or all 0
                 if 0 in np.sum(batch_ys, axis=0):
                     continue
                 
