@@ -10,7 +10,6 @@ from nilearn.signal import clean
 from sklearn.metrics import roc_auc_score
 from utils import (format_config, sparsity_penalty, reset, to_softmax, load_ae_encoder)
 from model import ae, nn
-from problem import get_train_data
 import random
 from sklearn.model_selection import train_test_split
 from scipy.stats import mode
