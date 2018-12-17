@@ -8,15 +8,23 @@ This repository contains python codes for the final AML project.
 Data we used for this project is available at https://paris-saclay-cds.github.io/autism_challenge/ (only `public set` is available) and initially published for competition: Imaging-psychiatry challenge: predicting autism (IMPAC). 
 
 ## Environment
-numpy \\
-scipy \\
-pandas>=0.21 \\
-scikit-learn>=0.19 \\
-pickle \\
-nilearn \\
-matplotlib \\
-seaborn \\
-tensorflow \\
+numpy 
+
+scipy
+
+pandas>=0.21
+
+scikit-learn>=0.19
+
+pickle
+
+nilearn
+
+matplotlib
+
+seaborn
+
+tensorflow
 
 ## Usage
 
@@ -48,7 +56,7 @@ tensorflow \\
 
 - CNN
 
-`CNN_ensemble.py` - ensemble CNN classifier (ref: https://github.com/MRegina/connectome_conv_net/blob/master/conv_net.py)
+`CNN_ensemble.py` - ensemble CNN classifier (ref: https://github.com/MRegina/connectome_conv_net)
 
 `CNN_original_trial.py` - CNN classifier with square filters and simply network (not in final use)
 
