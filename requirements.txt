@@ -1,8 +1,9 @@
-numpy
+numpy 
 scipy
 pandas>=0.21
 scikit-learn>=0.19
+pickle
 nilearn
 matplotlib
 seaborn
-jupyter
+tensorflow
