@@ -511,20 +511,20 @@ if __name__ == '__main__':
     fmri_feature = ['basc122', 'basc197', 'crad', 'harvard', 'msdl', 'power']
 
     for feature in fmri_feature:
-        feature_path = '1D-train/' + feature + '_corr_1d.npy'
+        feature_path = './data/1D-train/' + feature + '_corr_1d.npy'
         with open(feature_path, 'rb') as f:
             matrix = np.load(f)
             matrix_train = np.concatenate((matrix_train, matrix), axis = 1)
 
     for feature in fmri_feature:
-        feature_path = '1D-test/' + feature + '_corr_1d.npy'
+        feature_path = './data/1D-test/' + feature + '_corr_1d.npy'
         with open(feature_path, 'rb') as f:
             test_dat = np.load(f)
             X_test = np.concatenate((X_test, test_dat), axis = 1)
 
     with open('1D-train/y_train.pkl', 'rb') as f:
         label_train = pickle.load(f)
-    with open('1D-test/y_test.pkl', 'rb') as f:
+    with open('./data/1D-test/y_test.pkl', 'rb') as f:
         y_test = pickle.load(f)
 
 
