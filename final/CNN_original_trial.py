@@ -296,13 +296,13 @@ if __name__ == "__main__":
     
     fmri_feature = ['basc064','basc122','basc197','craddock_scorr_mean','harvard_oxford_cort_prob_2mm','msdl','power_2011']
     
-    with open('data_final/train/2D/' + fmri_feature[3] + '_corr_2d.npy', 'rb') as f:
+    with open('data/train/2D/' + fmri_feature[3] + '_corr_2d.npy', 'rb') as f:
         matrix_train = np.load(f)
-    with open('data_final/y_train.pkl', 'rb') as f:
+    with open('data/y_train.pkl', 'rb') as f:
         label_train = pickle.load(f)
-    with open('data_final/test/2D/' + fmri_feature[3] + '_corr_2d.npy', 'rb') as f:
+    with open('data/test/2D/' + fmri_feature[3] + '_corr_2d.npy', 'rb') as f:
         X_test = np.load(f)
-    with open('data_final/y_test.pkl', 'rb') as f:
+    with open('data/y_test.pkl', 'rb') as f:
         y_test = pickle.load(f)
     
     
