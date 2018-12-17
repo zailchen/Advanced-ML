@@ -475,34 +475,27 @@ if __name__ == '__main__':
 
     feature_list = ['basc064','basc122','basc197','power']
 
+    # Load data
     for feature in feature_list:
-
-        #feature_path = './1D/'+ feature + '_corr_1d.pkl' # adjust according to needs
-
-    # with open(feature_path, 'rb') as f:
-    #     matrix = clean(np.asarray(pickle.load(f)), detrend=False, standardize=True)
-    #     matrix_all = np.concatenate((matrix_all, matrix), axis=1)
-    #
-    #
-        with open('1D-train/' + feature + '_corr_1d.npy', 'rb') as f:
+        with open('./data/1D-train/' + feature + '_corr_1d.npy', 'rb') as f:
             matrix_train = np.load(f)
-        with open('1D-train/y_train.pkl', 'rb') as f:
+        with open('./data/1D-train/y_train.pkl', 'rb') as f:
             label_train = pickle.load(f)
-        with open('1D-test/' + feature + '_corr_1d.npy', 'rb') as f:
+        with open('./data/1D-test/' + feature + '_corr_1d.npy', 'rb') as f:
             X_test = np.load(f)
-        with open('1D-test/y_test.pkl', 'rb') as f:
+        with open('./data/1D-test/y_test.pkl', 'rb') as f:
             y_test = pickle.load(f)
 
         X_train, X_valid, y_train, y_valid = train_test_split(matrix_train, label_train, shuffle=True, test_size=0.25)
 
 
-        ae1_model_path = format_config("./data/model_separate/{experiment}_autoencoder-1.ckpt", {
+        ae1_model_path = format_config("./model/model_separate/{experiment}_autoencoder-1.ckpt", {
             "experiment": feature,
         })
-        ae2_model_path = format_config("./data/model_separate/{experiment}_autoencoder-2.ckpt", {
+        ae2_model_path = format_config("./model/model_separate/{experiment}_autoencoder-2.ckpt", {
             "experiment": feature,
         })
-        nn_model_path = format_config("./data/model_separate/{experiment}_mlp.ckpt", {
+        nn_model_path = format_config("./model/model_separate/{experiment}_mlp.ckpt", {
             "experiment": feature,
         })
 
