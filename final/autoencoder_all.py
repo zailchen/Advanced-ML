@@ -498,9 +498,9 @@ if __name__ == '__main__':
     # data_train, labels_train = get_train_data()
     #T1_feature = data_train.columns[3:210]
 
-    with open('1D-train/basc064_corr_1d.npy', 'rb') as f:
+    with open('./data/train/1D/basc064_corr_1d.npy', 'rb') as f:
         matrix_train = np.load(f)
-    with open('1D-test/basc064_corr_1d.npy', 'rb') as f:
+    with open('./data/train/1D/basc064_corr_1d.npy', 'rb') as f:
         X_test = np.load(f)
 
     prediction = []
@@ -508,23 +508,23 @@ if __name__ == '__main__':
 
     # data_train, labels_train = get_train_data()
 
-    fmri_feature = ['basc122', 'basc197', 'crad', 'harvard', 'msdl', 'power']
+    fmri_feature = ['basc122', 'basc197', 'craddock_scorr_mean', 'harvard_oxford_cort_prob_2mm', 'msdl', 'power_2011']
 
     for feature in fmri_feature:
-        feature_path = './data/1D-train/' + feature + '_corr_1d.npy'
+        feature_path = './data/train/1D/' + feature + '_corr_1d.npy'
         with open(feature_path, 'rb') as f:
             matrix = np.load(f)
             matrix_train = np.concatenate((matrix_train, matrix), axis = 1)
 
     for feature in fmri_feature:
-        feature_path = './data/1D-test/' + feature + '_corr_1d.npy'
+        feature_path = './data/test/1D/' + feature + '_corr_1d.npy'
         with open(feature_path, 'rb') as f:
             test_dat = np.load(f)
             X_test = np.concatenate((X_test, test_dat), axis = 1)
 
-    with open('1D-train/y_train.pkl', 'rb') as f:
+    with open('./data/y_train.pkl', 'rb') as f:
         label_train = pickle.load(f)
-    with open('./data/1D-test/y_test.pkl', 'rb') as f:
+    with open('./data/y_test.pkl', 'rb') as f:
         y_test = pickle.load(f)
 
 
