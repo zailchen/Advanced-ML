@@ -471,13 +471,13 @@ if __name__ == '__main__':
 
     # for feature in feature_list:
     feature = 'basc064'
-    with open('./data/1D-train/' + feature + '_corr_1d.npy', 'rb') as f:
+    with open('./data/train/1D/' + feature + '_corr_1d.npy', 'rb') as f:
         matrix_train = np.load(f)
-    with open('./data/1D-train/y_train.pkl', 'rb') as f:
+    with open('./data/y_train.pkl', 'rb') as f:
         label_train = pickle.load(f)
-    with open('./data/1D-test/' + feature + '_corr_1d.npy', 'rb') as f:
+    with open('./data/test/1D/' + feature + '_corr_1d.npy', 'rb') as f:
         X_test = np.load(f)
-    with open('./data/1D-test/y_test.pkl', 'rb') as f:
+    with open('./data/y_test.pkl', 'rb') as f:
         y_test = pickle.load(f)
 
     X_train, X_valid, y_train, y_valid = train_test_split(matrix_train, label_train, shuffle=True, test_size=0.25, random_state=10)
