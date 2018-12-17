@@ -14,54 +14,54 @@ data_train, labels_train = get_train_data()
 # We are focus on correlation connectivity measure for this analysis.
 
 
-with open('data/fmri_correlation_features/train/1D/msdl_corr_1d.npy', 'rb') as p_f:
+with open('data/train/1D/msdl_corr_1d.npy', 'rb') as p_f:
     train_msdl_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/train/1D/basc064_corr_1d.npy', 'rb') as p_f:
+with open('data/train/1D/basc064_corr_1d.npy', 'rb') as p_f:
     train_basc064_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/train/1D/basc122_corr_1d.npy', 'rb') as p_f:
+with open('data/train/1D/basc122_corr_1d.npy', 'rb') as p_f:
     train_basc122_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/train/1D/basc197_corr_1d.npy', 'rb') as p_f:
+with open('data/train/1D/basc197_corr_1d.npy', 'rb') as p_f:
     train_basc197_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/train/1D/craddock_scorr_mean_corr_1d.npy', 'rb') as p_f:
+with open('data/train/1D/craddock_scorr_mean_corr_1d.npy', 'rb') as p_f:
     train_craddock_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/train/1D/harvard_oxford_cort_prob_2mm_corr_1d.npy', 'rb') as p_f:
+with open('data/train/1D/harvard_oxford_cort_prob_2mm_corr_1d.npy', 'rb') as p_f:
     train_harvard_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/train/1D/power_2011_corr_1d.npy', 'rb') as p_f:
+with open('data/train/1D/power_2011_corr_1d.npy', 'rb') as p_f:
     train_power_corr = np.load(p_f)
 
 
-with open('data/fmri_correlation_features/test/1D/msdl_corr_1d.npy', 'rb') as p_f:
+with open('data/test/1D/msdl_corr_1d.npy', 'rb') as p_f:
     test_msdl_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/test/1D/basc064_corr_1d.npy', 'rb') as p_f:
+with open('data/test/1D/basc064_corr_1d.npy', 'rb') as p_f:
     test_basc064_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/test/1D/basc122_corr_1d.npy', 'rb') as p_f:
+with open('data/test/1D/basc122_corr_1d.npy', 'rb') as p_f:
     test_basc122_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/test/1D/basc197_corr_1d.npy', 'rb') as p_f:
+with open('data/test/1D/basc197_corr_1d.npy', 'rb') as p_f:
     test_basc197_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/test/1D/craddock_scorr_mean_corr_1d.npy', 'rb') as p_f:
+with open('data/test/1D/craddock_scorr_mean_corr_1d.npy', 'rb') as p_f:
     test_craddock_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/test/1D/harvard_oxford_cort_prob_2mm_corr_1d.npy', 'rb') as p_f:
+with open('data/test/1D/harvard_oxford_cort_prob_2mm_corr_1d.npy', 'rb') as p_f:
     test_harvard_corr = np.load(p_f)
 
-with open('data/fmri_correlation_features/test/1D/power_2011_corr_1d.npy', 'rb') as p_f:
+with open('data/test/1D/power_2011_corr_1d.npy', 'rb') as p_f:
     test_power_corr = np.load(p_f)
 
 
-with open('data/fmri_correlation_features/y_train.pkl', 'rb') as f:
+with open('data/y_train.pkl', 'rb') as f:
     label_train = pickle.load(f)
 
-with open('data/fmri_correlation_features/y_test.pkl', 'rb') as f:
+with open('data/y_test.pkl', 'rb') as f:
     label_test = pickle.load(f)
 
 
