@@ -15,15 +15,15 @@ See `Requirement.txt` for modules we use
 
 #### Preprocessing
 
+- Data Split
+
+`split_train_test.py` - randomly split training and test dataset, and fix for model input
+
 - Feature Extractor
 
 `feature_extractor.py` - extract correlation matrices for each fmri feature
 
 `FeatureExtractor_dtw.py` - extract dtw distance for each fmri feature (not in final use)
-
-- Data Split
-
-`split_train_test.py` - randomly split training and test dataset, and fix for model input
 
 #### Models
 
