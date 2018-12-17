@@ -4,17 +4,58 @@
 
 This repository contains python codes for the final AML project.
 
-## Installation
-Clone our project repository: `https://github.com/qianqianhu577/Advanced-ML`
-
-
 ## Dataset
 Data we used for this project is available at https://paris-saclay-cds.github.io/autism_challenge/ (only `public set` is available) and initially published for competition: Imaging-psychiatry challenge: predicting autism (IMPAC). 
 
+## Environment
+numpy
+scipy
+pandas>=0.21
+scikit-learn>=0.19
+pickle
+nilearn
+matplotlib
+seaborn
+tensorflow
+
+## Usage
+
+#### Preprocessing
+
+- Feature Extractor
+
+`feature_extractor.py` - extract correlation matrices for each fmri feature
+
+`FeatureExtractor_dtw.py` - extract dtw distance for each fmri feature (not in final use)
+
+- `split_train_test.py` - randomly split training and test dataset, and fix for model input
+
+#### Models
+
+- `simple_LR.py` - simple logistic regression classifier
+
+- AutoEncoder (dependency: `model.py`, `utils.py`, ref: https://github.com/lsa-pucrs/acerta-abide)
+
+`autoencoder_ensemble.py` - ensemble AutoEncoder classifier
+
+`autoencoder_basc064.py` - AutoEncoder classifier using only `basc064` feature (not in final use)
+
+`autoencoder_all.py` - AutoEncoder classsifier using all features as one time input (not in final use)
+
+- CNN (ref: https://github.com/MRegina/connectome_conv_net/blob/master/conv_net.py)
+
+`CNN_ensemble.py` - ensemble CNN classifier
+
+`CNN_original_trial.py` - CNN classifier with square filters and simply network (not in final use)
+
+#### Draw CNN
+
+- `draw_cnn_our_version.py` - code to draw cnn (ref: https://github.com/gwding/draw_convnet)
+
 
 ## Contributors
-- Ziyu Chen ([``])
+- Ziyu Chen ([`zc2393`])
 - Jongwoo Choi ([`jc4816`])
-- Qianqian Hu ([``])
+- Qianqian Hu ([`qh2185`])
 
 
