@@ -27,11 +27,11 @@ y_train = labels_combine[train_id]
 X_test = data_combine.iloc[test_id,:]
 y_test = labels_combine[test_id]
 
-with open('data_final/X_train.pkl', 'wb') as f:
+with open('data/X_train.pkl', 'wb') as f:
     pickle.dump(X_train, f)
-with open('data_final/y_train.pkl', 'wb') as f:
+with open('data/y_train.pkl', 'wb') as f:
     pickle.dump(y_train, f)
-with open('data_final/X_test.pkl', 'wb') as f:
+with open('data/X_test.pkl', 'wb') as f:
     pickle.dump(X_test, f)
-with open('data_final/y_test.pkl', 'wb') as f:
+with open('data/y_test.pkl', 'wb') as f:
     pickle.dump(y_test, f)
