@@ -31,7 +31,11 @@ See `Requirement.txt` for modules we use
 
 `simple_LR.py` - simple logistic regression classifier
 
-- AutoEncoder (dependency: `model.py`, `utils.py`, ref: https://github.com/lsa-pucrs/acerta-abide)
+- AutoEncoder (ref: https://github.com/lsa-pucrs/acerta-abide)
+
+`autoencoder_model.py` - network of autoencoder, including autoencoder(ae) and fully connected(nn) layer
+
+`ae_utils.py` -  preprocessing functions for autoencoder
 
 `autoencoder_ensemble.py` - ensemble AutoEncoder classifier
 
