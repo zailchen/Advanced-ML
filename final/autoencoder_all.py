@@ -530,13 +530,13 @@ if __name__ == '__main__':
 
     X_train, X_valid, y_train, y_valid = train_test_split(matrix_train, label_train, shuffle=True, test_size=0.25)
 
-    ae1_model_path = format_config("./data/models_all/{experiment}_autoencoder-1.ckpt", {
+    ae1_model_path = format_config("./model/ae_models_all/{experiment}_autoencoder-1.ckpt", {
         "experiment": feature,
     })
-    ae2_model_path = format_config("./data/models_all/{experiment}_autoencoder-2.ckpt", {
+    ae2_model_path = format_config("./model/ae_models_all/{experiment}_autoencoder-2.ckpt", {
         "experiment": feature,
     })
-    nn_model_path = format_config("./data/models_all/{experiment}_mlp.ckpt", {
+    nn_model_path = format_config("./model/ae_models_all/{experiment}_mlp.ckpt", {
         "experiment": feature,
     })
 
