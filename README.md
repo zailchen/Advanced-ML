@@ -8,15 +8,15 @@ This repository contains python codes for the final AML project.
 Data we used for this project is available at https://paris-saclay-cds.github.io/autism_challenge/ (only `public set` is available) and initially published for competition: Imaging-psychiatry challenge: predicting autism (IMPAC). 
 
 ## Environment
-numpy
-scipy
-pandas>=0.21
-scikit-learn>=0.19
-pickle
-nilearn
-matplotlib
-seaborn
-tensorflow
+numpy \\
+scipy \\
+pandas>=0.21 \\
+scikit-learn>=0.19 \\
+pickle \\
+nilearn \\
+matplotlib \\
+seaborn \\
+tensorflow \\
 
 ## Usage
 
@@ -28,11 +28,15 @@ tensorflow
 
 `FeatureExtractor_dtw.py` - extract dtw distance for each fmri feature (not in final use)
 
-- `split_train_test.py` - randomly split training and test dataset, and fix for model input
+- Data Split
+
+`split_train_test.py` - randomly split training and test dataset, and fix for model input
 
 #### Models
 
-- `simple_LR.py` - simple logistic regression classifier
+- Logistic Regression
+
+`simple_LR.py` - simple logistic regression classifier
 
 - AutoEncoder (dependency: `model.py`, `utils.py`, ref: https://github.com/lsa-pucrs/acerta-abide)
 
@@ -42,15 +46,13 @@ tensorflow
 
 `autoencoder_all.py` - AutoEncoder classsifier using all features as one time input (not in final use)
 
-- CNN (ref: https://github.com/MRegina/connectome_conv_net/blob/master/conv_net.py)
+- CNN
 
-`CNN_ensemble.py` - ensemble CNN classifier
+`CNN_ensemble.py` - ensemble CNN classifier (ref: https://github.com/MRegina/connectome_conv_net/blob/master/conv_net.py)
 
 `CNN_original_trial.py` - CNN classifier with square filters and simply network (not in final use)
 
-#### Draw CNN
-
-- `draw_cnn_our_version.py` - code to draw cnn (ref: https://github.com/gwding/draw_convnet)
+`draw_cnn_our_version.py` - code to draw cnn (ref: https://github.com/gwding/draw_convnet)
 
 
 ## Contributors
