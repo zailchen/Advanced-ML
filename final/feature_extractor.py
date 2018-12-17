@@ -119,8 +119,8 @@ def save_features(dataset, atlas_names):
         # Each atlas, 2D
         corr_2d_single_atlas = corr_2d_all_atlas[atlas_names.index(single_atlas)]
         # save
-        np.save('data_final/' + dataset + '/1D/' + single_atlas + '_corr_1d', corr_1d_single_atlas)
-        np.save('data_final/' + dataset + '/2D/' + single_atlas + '_corr_2d', corr_2d_single_atlas)
+        np.save('data/' + dataset + '/1D/' + single_atlas + '_corr_1d', corr_1d_single_atlas)
+        np.save('data/' + dataset + '/2D/' + single_atlas + '_corr_2d', corr_2d_single_atlas)
 
 
 save_features('train', atlas_names)
