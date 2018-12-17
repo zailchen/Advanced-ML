@@ -43,7 +43,7 @@ See `Requirement.txt` for modules we use
 
 `CNN_ensemble.py` - ensemble CNN classifier (ref: https://github.com/MRegina/connectome_conv_net)
 
-`CNN_original_trial.py` - CNN classifier with square filters and simply network (not in final use)
+`CNN_original_trial.py` - CNN classifier with square filters and simple network (not in final use)
 
 `draw_cnn_our_version.py` - code to draw cnn (ref: https://github.com/gwding/draw_convnet)
 
