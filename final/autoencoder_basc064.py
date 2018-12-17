@@ -469,10 +469,6 @@ if __name__ == '__main__':
     prediction = []
     logits = np.zeros((230, 2))
 
-    # data_train, labels_train = get_train_data()
-
-    #feature_list = ['basc064', 'basc122', 'basc197', 'power']
-
     # for feature in feature_list:
     feature = 'basc064'
     with open('./data/1D-train/' + feature + '_corr_1d.npy', 'rb') as f:
